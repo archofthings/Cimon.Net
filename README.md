@@ -211,7 +211,7 @@ dotnet build
 dotnet test
 ```
 
-`EthernetConnector` tests run against a local mock TCP server built with [Rony.Net](https://github.com/MojtabaKiani/Rony.Net).
+`EthernetConnector` tests run against a local mock TCP server built with [Rony.Net](https://github.com/archofthings/Rony.Net).
 `SerialConnector` tests use a fake serial socket, so no device is needed.
 
 ## Contributing
