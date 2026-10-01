@@ -20,27 +20,76 @@ Or via the .NET Core command-line interface:
 Either commands, from Package Manager Console or .NET Core CLI, will download and install **Cimon.Net** and all required dependencies.
 
 ### 2. Defining your Connector
-Create a Connector based on your connection type, You can choose between `EthernetConnector` to support Ethernet TCP/UDP connection or `SerialConnector` to support RS232C/RS485 serial interfaces.
+Create a Connector based on your connection type. You can choose between `EthernetConnector` to support Ethernet TCP connection or `SerialConnector` to support RS232C/RS485 serial interfaces.
 
 `EthernetConnector` usage sample for reading 10 bits from Input device memory `X` address 000001:
-   
-    var Plc = new EthernetConnector(new TcpSocket("192.168.1.10", 10620), true);
-    var (responseCode, data) = await Plc.ReadBitAsync(MemoryType.X, "000001", 10);
 
-`SerialConnector` usage sample for write 5 bits to Output device memory `Y` address 000010:
-   
-    var Plc = new SerialConnector(new SerialSocket("COM3", 9600), true);
-    await Plc.WriteBitAsync(MemoryType.Y, "000010", 1, 1, 1, 0, 1);
-    
+```csharp
+using var plc = new EthernetConnector(new TcpSocket("192.168.1.10", 10620));
+var (responseCode, data) = await plc.ReadBitAsync(MemoryType.X, "000001", 10);
+```
+
+`SerialConnector` usage sample for writing 5 bits to Output device memory `Y` address 000010:
+
+```csharp
+using var plc = new SerialConnector(new SerialSocket("COM3", 9600));
+var responseCode = await plc.WriteBitAsync(MemoryType.Y, "000010", 1, 1, 1, 0, 1);
+```
+
+Always check the returned `ResponseCode`: `ResponseCode.Success` means the PLC accepted the request.
+
+### 3. Connection handling
+With `autoConnect` enabled (the default), every read/write opens the connection if it is not open and closes it again when done.
+For frequent polling it is much cheaper to keep one connection open:
+
+```csharp
+using var plc = new EthernetConnector(new TcpSocket("192.168.1.10"));
+await plc.Connect(readTimeout: 1000, writeTimeout: 1000, pingTimeout: 3000);
+
+while (running)
+{
+    var (code, words) = await plc.ReadWordAsync(MemoryType.D, "000100", 10);
+    // ...
+}
+
+plc.Disconnect();
+```
+
+Connections opened explicitly with `Connect()` are kept open, even when `autoConnect` is enabled.
+Requests sent through one connector are serialized, so a connector can safely be shared between tasks.
+
+By default `TcpSocket` pings the PLC before connecting. If your network blocks ICMP, disable it:
+
+```csharp
+var socket = new TcpSocket("192.168.1.10", 10620, usePing: false);
+```
+
+### Limits per request
+
+| Function        | Ethernet     | Serial       |
+|-----------------|--------------|--------------|
+| `ReadWordAsync` | 1-512 words  | 1-63 words   |
+| `ReadBitAsync`  | 1-1024 bits  | 1-126 bits   |
+| `WriteWordAsync`| 1-64 words   | 1-61 words   |
+| `WriteBitAsync` | 1-256 bits   | 1-126 bits   |
+
 ## Documentation
 Check the Wiki and feel free to edit it: https://github.com/MojtabaKiani/Cimon.Net/wiki
 
 ## Supported PLCs
 Complete range of Cimon PLC products including `PLC-S`, `CP`, `XP` series
 
-## Compile
-You need at least Visual Studio 2019 (you can download the Community Edition for free).
+## Supported platforms
+The package targets `netstandard2.0` and `net8.0`, so it works on .NET Framework 4.6.1+, .NET Core 2.0+ and all modern .NET versions.
 
-## Running the tests
+## Build and test
+You need the [.NET SDK](https://dotnet.microsoft.com/download) 10 or newer.
+
+    dotnet build
+    dotnet test
+
 I used my library [Rony.Net](https://github.com/MojtabaKiani/Rony.Net) in unit tests for `EthernetConnector`. But for `SerialConnector`
 I used no device or library and it only works with a fake socket.
+
+## Changes
+See [CHANGELOG.md](CHANGELOG.md).

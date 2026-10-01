@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 using CimonPlc.PlcConnectors;
 using CimonPlc.Enums;
@@ -19,7 +20,7 @@ namespace CimonPlc.UnitTests
         [InlineData(1000, 1000, 1000)]
         [InlineData(5000, 4000, 3000)]
         [InlineData(1000, 1000, 5000)]
-        public async void Connect_Should_Return_Connected_On_Valid_Data(int readTimeout, int writeTimeout, int pingTimeout)
+        public async Task Connect_Should_Return_Connected_On_Valid_Data(int readTimeout, int writeTimeout, int pingTimeout)
         {
             //Arrange 
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10619));
@@ -39,7 +40,7 @@ namespace CimonPlc.UnitTests
         [InlineData(0, 1000, 1000)]
         [InlineData(1000, 0, 1000)]
         [InlineData(1000, 1000, 0)]
-        public async void Connect_Should_Return_Error_On_Incorrect_Data(int readTimeout, int writeTimeout, int pingTimeout)
+        public async Task Connect_Should_Return_Error_On_Incorrect_Data(int readTimeout, int writeTimeout, int pingTimeout)
         {
             //Arrange 
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10620));
@@ -54,7 +55,7 @@ namespace CimonPlc.UnitTests
         [InlineData(MemoryType.D, "000F0", 6)]
         [InlineData(MemoryType.M, "0F010", 100)]
         [InlineData(MemoryType.L, "000F10", 100)]
-        public async void ReadWordAsync_Should_Return_Value_On_Correct_Data(MemoryType memoryType, string address, int length)
+        public async Task ReadWordAsync_Should_Return_Value_On_Correct_Data(MemoryType memoryType, string address, int length)
         {
             //Arrange 
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10620));
@@ -90,7 +91,7 @@ namespace CimonPlc.UnitTests
         [InlineData(MemoryType.D, "000051", 6)]
         [InlineData(MemoryType.M, "0F01", 600)]
         [InlineData(MemoryType.Y, "000F1", 0)]
-        public async void ReadWordAsync_Should_Return_Error_On_Incorrect_Data(MemoryType memoryType, string address, int length)
+        public async Task ReadWordAsync_Should_Return_Error_On_Incorrect_Data(MemoryType memoryType, string address, int length)
         {
             //Arrange 
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10620));
@@ -105,7 +106,7 @@ namespace CimonPlc.UnitTests
         [InlineData(MemoryType.D, "000F5", 6)]
         [InlineData(MemoryType.M, "0F01", 100)]
         [InlineData(MemoryType.L, "000F1", 100)]
-        public async void ReadBitAsync_Should_Return_Value_On_Correct_Data(MemoryType memoryType, string address, int length)
+        public async Task ReadBitAsync_Should_Return_Value_On_Correct_Data(MemoryType memoryType, string address, int length)
         {
             //Arrange
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10621));
@@ -140,7 +141,7 @@ namespace CimonPlc.UnitTests
         [InlineData(MemoryType.D, "000x5", 6)]
         [InlineData(MemoryType.M, "0F01", 1060)]
         [InlineData(MemoryType.Y, "000F1", 0)]
-        public async void ReadBitAsync_Should_Return_Error_On_Incorrect_Data(MemoryType memoryType, string address, int length)
+        public async Task ReadBitAsync_Should_Return_Error_On_Incorrect_Data(MemoryType memoryType, string address, int length)
         {
             //Arrange
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10620));
@@ -155,7 +156,7 @@ namespace CimonPlc.UnitTests
         [InlineData(MemoryType.D, "000F0", 16050)]
         [InlineData(MemoryType.M, "0F010", 100, 100, 10000, 1200, 1400)]
         [InlineData(MemoryType.L, "000F0", 1010, 65000, 3403, 2302)]
-        public async void WriteWordAsync_Should_Return_Value_On_Correct_Data(MemoryType memoryType, string address, params int[] data)
+        public async Task WriteWordAsync_Should_Return_Value_On_Correct_Data(MemoryType memoryType, string address, params int[] data)
         {
             //Arrange
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10622));
@@ -187,7 +188,7 @@ namespace CimonPlc.UnitTests
         [InlineData(MemoryType.M, "0F00", 70000, 30000, 40000)]
         [InlineData(MemoryType.Y, "000F0", -10, 100, 1000)]
         [InlineData(MemoryType.Y, "0")]
-        public async void WriteWordAsync_Should_Return_Error_On_Incorrect_Data(MemoryType memoryType, string address, params int[] data)
+        public async Task WriteWordAsync_Should_Return_Error_On_Incorrect_Data(MemoryType memoryType, string address, params int[] data)
         {
             //Arrange
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10620));
@@ -203,7 +204,7 @@ namespace CimonPlc.UnitTests
         [InlineData(MemoryType.D, "000F1", (byte)1, (byte)1)]
         [InlineData(MemoryType.M, "0F011", (byte)1, (byte)1, (byte)0, (byte)1, (byte)1)]
         [InlineData(MemoryType.L, "000F0", (byte)1, (byte)1, (byte)1, (byte)0)]
-        public async void WriteBitAsync_Should_Return_Value_On_Correct_Data(MemoryType memoryType, string address, params byte[] data)
+        public async Task WriteBitAsync_Should_Return_Value_On_Correct_Data(MemoryType memoryType, string address, params byte[] data)
         {
             //Arrange
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10623));
@@ -234,7 +235,7 @@ namespace CimonPlc.UnitTests
         [InlineData(MemoryType.D, "000x5", (byte)1)]
         [InlineData(MemoryType.D, "000F5", (byte)2)]
         [InlineData(MemoryType.Y, "0")]
-        public async void WriteBitAsync_Should_Return_Error_On_Incorrect_Data(MemoryType memoryType, string address, params byte[] data)
+        public async Task WriteBitAsync_Should_Return_Error_On_Incorrect_Data(MemoryType memoryType, string address, params byte[] data)
         {
             //Arrange
             var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10623));

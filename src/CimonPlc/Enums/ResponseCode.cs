@@ -1,7 +1,7 @@
 ﻿namespace CimonPlc.Enums
 {
     /// <summary>
-    ///     Error Code From Cimon PLC on read & write
+    ///     Error Code From Cimon PLC on read &amp; write
     /// </summary>
     public enum ResponseCode
     {
