@@ -4,10 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CimonPlc.Enums;
 using CimonPlc.PlcConnectors;
-using CimonPlc.Sockets;
 using CimonPlc.UnitTests.FakeClasses;
-using Rony.Listeners;
-using Rony.Net;
 using Xunit;
 
 namespace CimonPlc.UnitTests
@@ -170,25 +167,6 @@ namespace CimonPlc.UnitTests
 
             //Assert
             Assert.False(connector.IsConnected);
-        }
-
-        [Fact]
-        public async Task TcpSocket_Should_Reconnect_After_AutoDisconnect()
-        {
-            //Arrange
-            using var connector = new EthernetConnector(new TcpSocket("127.0.0.1", 10624));
-            using var mockServer = new MockServer(new TcpServer(10624));
-            mockServer.Start();
-            mockServer.Mock.Send("").Receive(x => WriteAck(x));
-
-            //Act
-            var first = await connector.WriteWordAsync(MemoryType.D, "0", 1);
-            var second = await connector.WriteWordAsync(MemoryType.D, "0", 2);
-            mockServer.Stop();
-
-            //Assert
-            Assert.Equal(ResponseCode.Success, first);
-            Assert.Equal(ResponseCode.Success, second);
         }
     }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Tests
+- Updated the test mock server to [Rony.Net](https://github.com/archofthings/Rony.Net) 1.5.0 and `Rony.Net.Xunit`. Every test gets its own server on a free port,
+  so tests no longer share fixed ports, and the server log is written to the test output.
+- Added a simulated PLC (`CimonPlcSimulator`) that keeps word and bit memory, and a `CimonFraming` that splits requests by the frame length field.
+- New tests check the exact frames sent to the PLC, values written and read back, connection reuse and closing, concurrent requests,
+  PLC error codes, and network failures (chunked, slow, truncated, corrupted, missing and dropped responses, connection resets and refused connections).
+
 ## 2.0.0
 
 ### Fixed

@@ -211,8 +211,28 @@ dotnet build
 dotnet test
 ```
 
-`EthernetConnector` tests run against a local mock TCP server built with [Rony.Net](https://github.com/archofthings/Rony.Net).
-`SerialConnector` tests use a fake serial socket, so no device is needed.
+No PLC is needed. `EthernetConnector` tests talk over real TCP sockets to a PLC simulated with the
+[Rony.Net](https://github.com/archofthings/Rony.Net) mock server, and `SerialConnector` tests use a fake serial socket.
+
+The Ethernet tests are also a sample of testing a binary protocol client with Rony.Net:
+
+- [`PlcMockServerTest`](https://github.com/archofthings/Cimon.Net/blob/main/tests/CimonPlc.UnitTests/Simulators/PlcMockServerTest.cs) uses `Rony.Net.Xunit` to give every test its own server on a free port, with its log in the test output.
+- [`CimonFraming`](https://github.com/archofthings/Cimon.Net/blob/main/tests/CimonPlc.UnitTests/Simulators/CimonFraming.cs) is a custom `IMessageFraming` that splits the TCP stream into Cimon frames.
+- [`CimonPlcSimulator`](https://github.com/archofthings/Cimon.Net/blob/main/tests/CimonPlc.UnitTests/Simulators/CimonPlcSimulator.cs) answers like a PLC and keeps its memory, so written values can be read back.
+- [`EthernetFailureTests`](https://github.com/archofthings/Cimon.Net/blob/main/tests/CimonPlc.UnitTests/CimonPlc/EthernetFailureTests.cs) simulates slow, chunked, truncated, corrupted and dropped responses.
+
+```csharp
+Plc.Attach(Server);                                   // answer like a PLC
+using var connector = CreateConnector();              // EthernetConnector for 127.0.0.1:Server.Port
+
+await connector.WriteWordAsync(MemoryType.D, "100", 1, 2, 3);
+var (code, words) = await connector.ReadWordAsync(MemoryType.D, "100", 3);   // [1, 2, 3]
+
+Server.Should().HaveAcceptedConnections(Times.Exactly(2))   // autoConnect: one connection per request
+    .And.HaveReceivedInOrder(
+        r => r.Body[10] == (byte)WriteCommands.WordBlockWrite,
+        r => r.Body[10] == (byte)ReadCommand.WordBlockRead);
+```
 
 ## Contributing
 
